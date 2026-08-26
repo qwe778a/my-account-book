@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的记账本</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .box { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { background: #eee; padding: 10px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between; }
+        .del { color: red; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>💰 流水账</h2>
+    <input id="desc" placeholder="项目（如：午餐）">
+    <input id="amount" placeholder="金额（如：25.5）" type="number">
+    <button onclick="addRecord()">➕ 添加</button>
+    <hr>
+    <div>余额：<span id="balance">0</span> 元</div>
+    <ul id="list"></ul>
+</div>
+<script>
+    let records = JSON.parse(localStorage.getItem('records')) || [];
+    function save() { localStorage.setItem('records', JSON.stringify(records)); render(); }
+    function render() {
+        let html = '';
+        let total = 0;
+        records.forEach((r, i) => {
+            total += r.amount;
+            html += `<li>${r.desc} <span>${r.amount.toFixed(2)}元 <span class="del" onclick="del(${i})">✕</span></span></li>`;
+        });
+        document.getElementById('list').innerHTML = html;
+        document.getElementById('balance').textContent = total.toFixed(2);
+    }
+    function addRecord() {
+        const desc = document.getElementById('desc').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        if (!desc || isNaN(amount)) return alert('请完整填写项目和金额');
+        records.push({ desc, amount });
+        document.getElementById('desc').value = '';
+        document.getElementById('amount').value = '';
+        save();
+    }
+    function del(i) { records.splice(i, 1); save(); }
+    render();
+</script>
+</body>
+</html>
