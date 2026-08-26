@@ -7,53 +7,60 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, Arial; padding: 16px; background: #b7eb8f; margin: 0; }
+        body { font-family: -apple-system, Arial; padding: 16px; background: #ffffff; margin: 0; }
         .container { max-width: 420px; margin: auto; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        h2 { margin: 0 0 12px 0; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .card { background: #f8f9fa; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        h2 { margin: 0 0 12px 0; font-size: 18px; color: #333; }
         .row { display: flex; gap: 10px; flex-wrap: wrap; }
         .row input, .row select, .row button { flex: 1; min-width: 80px; }
-        input, select, button, textarea { padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 10px; outline: none; width: 100%; margin-bottom: 10px; background: #fafafa; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { border-color: #a55eea; background: white; }
-        button { background: #a55eea; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        input, select, button, textarea { padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 10px; outline: none; width: 100%; margin-bottom: 10px; background: #ffffff; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: #007bff; background: white; }
+        button { background: #007bff; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; border-radius: 10px; }
         button:active { transform: scale(0.97); }
-        .btn-danger { background: #ff6b6b; }
-        .btn-success { background: #2ed573; }
-        .btn-warning { background: #feca57; color: #333; }
-        .btn-outline { background: transparent; color: #a55eea; border: 2px solid #a55eea; }
-        .balance-box { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; padding: 8px 0; }
-        .balance-box span { color: #a55eea; }
-        .record-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .btn-danger { background: #dc3545; }
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-outline { background: transparent; color: #007bff; border: 2px solid #007bff; }
+        .balance-box { display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; padding: 6px 0; }
+        .balance-box span { color: #333; }
+        .record-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .record-item .info { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .record-item .category { background: #f0f0f0; padding: 2px 10px; border-radius: 12px; font-size: 12px; color: #666; }
-        .record-item .amount { font-weight: 700; color: #e74c3c; }
-        .record-item .amount.income { font-weight: 700; color: #27ae60; }
+        .record-item .category { background: #e9ecef; padding: 2px 10px; border-radius: 12px; font-size: 12px; color: #666; }
+        .record-item .amount { font-weight: 700; color: #dc3545; }
+        .record-item .amount.income { font-weight: 700; color: #28a745; }
         .record-item .del { color: #ccc; font-size: 18px; cursor: pointer; padding: 0 6px; }
-        .record-item .del:active { color: #ff6b6b; }
+        .record-item .del:active { color: #dc3545; }
         .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-        .tab-bar button { flex: 1; background: #f0f0f0; color: #333; border: none; padding: 10px 6px; border-radius: 10px; font-size: 13px; min-width: 60px; }
-        .tab-bar .active { background: #a55eea; color: white; }
+        .tab-bar button { flex: 1; background: #e9ecef; color: #333; border: none; padding: 10px 6px; border-radius: 10px; font-size: 13px; min-width: 60px; }
+        .tab-bar .active { background: #007bff; color: white; }
         .chart-container { height: 180px; margin-top: 10px; }
         .empty-tip { text-align: center; color: #999; padding: 30px 0; font-size: 14px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
-        .stats-grid div { background: #f8f9fa; padding: 10px; border-radius: 10px; }
-        .stats-grid .num { font-size: 20px; font-weight: bold; color: #a55eea; }
+        .stats-grid div { background: white; padding: 10px; border-radius: 10px; }
+        .stats-grid .num { font-size: 20px; font-weight: bold; color: #007bff; }
         .stats-grid .label { font-size: 12px; color: #888; }
         .hidden { display: none; }
         textarea { height: 120px; font-size: 14px; resize: vertical; }
         .import-hint { font-size: 13px; color: #888; margin-bottom: 8px; }
         .toast { background: #333; color: white; padding: 12px 20px; border-radius: 10px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 999; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 90%; }
         .toast.show { opacity: 1; }
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .asset-item .name { font-weight: 600; }
-        .asset-item .bal { color: #2ed573; font-weight: 600; }
-        .asset-item .bal.negative { color: #ff6b6b; }
+        .asset-item .bal { color: #28a745; font-weight: 600; }
+        .asset-item .bal.negative { color: #dc3545; }
         .asset-actions { display: flex; gap: 6px; }
         .asset-actions button { padding: 4px 12px; font-size: 14px; margin: 0; flex: 0; }
-        .total-assets { font-size: 24px; color: #a55eea; font-weight: bold; text-align: center; padding: 10px 0; }
-        /* 趋势图专用颜色 */
-        .trend-up { color: #27ae60; font-weight: 700; }
-        .trend-down { color: #e74c3c; font-weight: 700; }
+        .total-assets { font-size: 24px; color: #007bff; font-weight: bold; text-align: center; padding: 10px 0; }
+        .trend-up { color: #28a745; font-weight: 700; }
+        .trend-down { color: #dc3545; font-weight: 700; }
+        .balance-chart-container { height: 120px; margin-top: 6px; }
+        .balance-row { display: flex; justify-content: space-between; align-items: center; }
+        .balance-label { font-size: 14px; color: #888; }
+        .balance-number { font-size: 28px; font-weight: bold; color: #333; }
+        .balance-detail { display: flex; gap: 20px; margin-top: 4px; }
+        .balance-detail-item { font-size: 13px; }
+        .balance-detail-item .income-text { color: #28a745; font-weight: 600; }
+        .balance-detail-item .expense-text { color: #dc3545; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -62,23 +69,23 @@
 
     <!-- ===== 顶部标签 ===== -->
     <div class="tab-bar">
-        <button class="active" onclick="switchTab('record')">📝 记账</button>
-        <button onclick="switchTab('import')">📥 导入</button>
-        <button onclick="switchTab('asset')">💼 资产</button>
-        <button onclick="switchTab('stats')">📊 统计</button>
+        <button class="active" onclick="switchTab('record')">记账</button>
+        <button onclick="switchTab('import')">导入</button>
+        <button onclick="switchTab('asset')">资产</button>
+        <button onclick="switchTab('stats')">统计</button>
     </div>
 
     <!-- ===== 记账页 ===== -->
     <div id="tab-record">
         <div class="card">
-            <h2>💰 流水账</h2>
+            <h2>流水账</h2>
             <select id="category">
-                <option value="餐饮">🍜 餐饮</option>
-                <option value="交通">🚗 交通</option>
-                <option value="购物">🛍️ 购物</option>
-                <option value="娱乐">🎮 娱乐</option>
-                <option value="工资">💼 工资</option>
-                <option value="其他">📦 其他</option>
+                <option value="餐饮">餐饮</option>
+                <option value="交通">交通</option>
+                <option value="购物">购物</option>
+                <option value="娱乐">娱乐</option>
+                <option value="工资">工资</option>
+                <option value="其他">其他</option>
             </select>
             <input id="desc" placeholder="项目（如：午餐）">
             <div class="row">
@@ -92,20 +99,21 @@
         </div>
 
         <div class="card">
-            <div class="balance-box">
-                <span>💰 余额</span>
-                <span id="balance">0.00</span>
+            <div class="balance-row">
+                <span class="balance-label">余额</span>
+                <span class="balance-number" id="balance">0.00</span>
             </div>
-            <div class="balance-box" style="font-size:14px;color:#888;">
-                <span>📈 总收入</span>
-                <span id="totalIncome" class="trend-up">0.00</span>
-                <span>📉 总支出</span>
-                <span id="totalExpense" class="trend-down">0.00</span>
+            <div class="balance-detail">
+                <span class="balance-detail-item">收入 <span class="income-text" id="totalIncome">0.00</span></span>
+                <span class="balance-detail-item">支出 <span class="expense-text" id="totalExpense">0.00</span></span>
+            </div>
+            <div class="balance-chart-container">
+                <canvas id="balanceChart"></canvas>
             </div>
         </div>
 
         <div class="card">
-            <h2>📋 流水</h2>
+            <h2>流水</h2>
             <div id="recordList"></div>
         </div>
     </div>
@@ -113,21 +121,21 @@
     <!-- ===== 导入页 ===== -->
     <div id="tab-import" class="hidden">
         <div class="card">
-            <h2>📥 批量导入</h2>
+            <h2>批量导入</h2>
             <p class="import-hint">从微信/支付宝导出CSV后，复制里面的内容粘贴到下方文本框，点击导入。</p>
             <textarea id="csvInput" placeholder="粘贴CSV数据到这里..."></textarea>
             <div class="row">
-                <button class="btn-success" onclick="importCSV()" style="flex:1;">📤 导入数据</button>
+                <button class="btn-success" onclick="importCSV()" style="flex:1;">导入数据</button>
                 <button class="btn-warning" onclick="document.getElementById('csvInput').value=''" style="flex:1;">清空</button>
             </div>
             <details style="margin-top:10px;font-size:13px;color:#888;">
-                <summary>📖 微信CSV格式示例</summary>
+                <summary>微信CSV格式示例</summary>
                 <pre style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all;">交易时间,交易类型,交易对方,商品,收/支,金额(元),支付方式,当前状态,交易单号,商户单号,备注
 2026-08-26 12:30:00,扫码支付,张三,午餐,支出,25.50,零钱,支付成功,4200001234567890,1234567890123456,
 2026-08-25 09:00:00,转账,李四,工资,收入,5000.00,银行卡,支付成功,4200000987654321,9876543210987654,</pre>
             </details>
             <details style="margin-top:10px;font-size:13px;color:#888;">
-                <summary>📖 支付宝CSV格式示例</summary>
+                <summary>支付宝CSV格式示例</summary>
                 <pre style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all;">交易号,商品名称,金额,交易状态,交易时间,交易对方
 202608261200001,午餐,-25.50,交易成功,2026-08-26 12:30:00,张三
 202608250900001,工资,5000.00,交易成功,2026-08-25 09:00:00,李四</pre>
@@ -138,41 +146,41 @@
     <!-- ===== 资产页 ===== -->
     <div id="tab-asset" class="hidden">
         <div class="card">
-            <h2>💼 我的资产</h2>
-            <div class="total-assets" id="totalAssets">¥0.00</div>
+            <h2>我的资产</h2>
+            <div class="total-assets" id="totalAssets">0.00</div>
             <div id="assetList"></div>
         </div>
         <div class="card">
-            <h2>➕ 添加账户</h2>
+            <h2>添加账户</h2>
             <div class="row">
                 <input id="assetName" placeholder="账户名（如：微信）" style="flex:2;">
                 <input id="assetBalance" placeholder="余额" type="number" step="0.01" style="flex:1;">
             </div>
-            <button onclick="addAsset()">➕ 添加账户</button>
+            <button onclick="addAsset()">添加账户</button>
         </div>
     </div>
 
     <!-- ===== 统计页 ===== -->
     <div id="tab-stats" class="hidden">
         <div class="card">
-            <h2>📊 本月统计</h2>
+            <h2>本月统计</h2>
             <div class="stats-grid" id="monthStats">
                 <div><div class="num" id="mCount">0</div><div class="label">笔数</div></div>
-                <div><div class="num" id="mIncome" style="color:#27ae60;">0</div><div class="label">收入</div></div>
-                <div><div class="num" id="mExpense" style="color:#e74c3c;">0</div><div class="label">支出</div></div>
+                <div><div class="num" id="mIncome" style="color:#28a745;">0</div><div class="label">收入</div></div>
+                <div><div class="num" id="mExpense" style="color:#dc3545;">0</div><div class="label">支出</div></div>
             </div>
         </div>
         <div class="card">
-            <h2>🧩 分类支出</h2>
+            <h2>分类支出</h2>
             <div class="chart-container"><canvas id="categoryChart"></canvas></div>
         </div>
         <div class="card">
-            <h2>📈 每日趋势</h2>
+            <h2>每日趋势</h2>
             <div class="chart-container"><canvas id="trendChart"></canvas></div>
         </div>
         <div class="card" style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn-success" onclick="exportData()" style="flex:1;">📤 导出数据</button>
-            <button class="btn-danger" onclick="clearAll()" style="flex:1;">🗑️ 清空</button>
+            <button class="btn-success" onclick="exportData()" style="flex:1;">导出数据</button>
+            <button class="btn-danger" onclick="clearAll()" style="flex:1;">清空</button>
         </div>
     </div>
 </div>
@@ -180,9 +188,8 @@
 <script>
     let records = JSON.parse(localStorage.getItem('records')) || [];
     let assets = JSON.parse(localStorage.getItem('assets')) || [];
-    let chartCategory = null, chartTrend = null;
+    let chartCategory = null, chartTrend = null, chartBalance = null;
 
-    // ===== Toast =====
     function showToast(msg) {
         const t = document.getElementById('toast');
         t.textContent = msg;
@@ -191,7 +198,6 @@
         t._timer = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
-    // ===== 切换标签 =====
     function switchTab(tab) {
         document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
         ['record','import','asset','stats'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden'));
@@ -200,15 +206,15 @@
         document.getElementById('tab-'+tab).classList.remove('hidden');
         if (tab === 'asset') renderAssets();
         if (tab === 'stats') renderStats();
+        if (tab === 'record') renderBalanceChart();
     }
 
-    // ===== 记账 =====
     function addRecord() {
         const desc = document.getElementById('desc').value.trim();
         const amount = parseFloat(document.getElementById('amount').value);
         const type = document.getElementById('type').value;
         const category = document.getElementById('category').value;
-        if (!desc || isNaN(amount) || amount <= 0) return showToast('⚠️ 请完整填写项目和金额');
+        if (!desc || isNaN(amount) || amount <= 0) return showToast('请完整填写项目和金额');
         records.push({
             desc,
             amount: type === 'expense' ? -amount : amount,
@@ -218,22 +224,22 @@
         document.getElementById('desc').value = '';
         document.getElementById('amount').value = '';
         save();
-        showToast('✅ 添加成功');
+        showToast('添加成功');
     }
 
     function del(i) {
         if (confirm('删除这条记录？')) {
             records.splice(i, 1);
             save();
-            showToast('🗑️ 已删除');
+            showToast('已删除');
         }
     }
 
     function clearAll() {
-        if (confirm('确定要删除所有数据吗？⚠️')) {
+        if (confirm('确定要删除所有数据吗？')) {
             records = [];
             save();
-            showToast('🗑️ 已清空所有数据');
+            showToast('已清空所有数据');
         }
     }
 
@@ -242,6 +248,7 @@
         localStorage.setItem('assets', JSON.stringify(assets));
         renderRecords();
         updateBalance();
+        renderBalanceChart();
         if (document.getElementById('tab-asset') && !document.getElementById('tab-asset').classList.contains('hidden')) {
             renderAssets();
         }
@@ -250,7 +257,7 @@
     function renderRecords() {
         const list = document.getElementById('recordList');
         if (records.length === 0) {
-            list.innerHTML = '<div class="empty-tip">暂无记录，记一笔吧 📝</div>';
+            list.innerHTML = '<div class="empty-tip">暂无记录，记一笔吧</div>';
             return;
         }
         let html = '';
@@ -270,7 +277,7 @@
                     </div>
                     <span>
                         <span class="amount ${cls}">${sign}${Math.abs(r.amount).toFixed(2)}</span>
-                        <span class="del" onclick="del(${i})">✕</span>
+                        <span class="del" onclick="del(${i})">×</span>
                     </span>
                 </div>
             `;
@@ -290,30 +297,60 @@
         document.getElementById('totalExpense').textContent = expense.toFixed(2);
     }
 
+    function renderBalanceChart() {
+        if (chartBalance) chartBalance.destroy();
+        const ctx = document.getElementById('balanceChart').getContext('2d');
+        const income = parseFloat(document.getElementById('totalIncome').textContent) || 0;
+        const expense = parseFloat(document.getElementById('totalExpense').textContent) || 0;
+        chartBalance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['收入', '支出'],
+                datasets: [{
+                    data: [income, expense],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderRadius: 6,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
     // ===== 资产管理 =====
     function addAsset() {
         const name = document.getElementById('assetName').value.trim();
         const balance = parseFloat(document.getElementById('assetBalance').value);
-        if (!name) return showToast('⚠️ 请输入账户名');
-        if (isNaN(balance)) return showToast('⚠️ 请输入有效余额');
-        if (assets.find(a => a.name === name)) return showToast('⚠️ 该账户已存在');
+        if (!name) return showToast('请输入账户名');
+        if (isNaN(balance)) return showToast('请输入有效余额');
+        if (assets.find(a => a.name === name)) return showToast('该账户已存在');
         assets.push({ name, balance });
         document.getElementById('assetName').value = '';
         document.getElementById('assetBalance').value = '';
         save();
         renderAssets();
-        showToast('✅ 账户添加成功');
+        showToast('账户添加成功');
     }
 
     function updateAsset(name, delta) {
         const asset = assets.find(a => a.name === name);
         if (!asset) return;
         const newBalance = asset.balance + delta;
-        if (newBalance < 0) return showToast('⚠️ 余额不能为负');
+        if (newBalance < 0) return showToast('余额不能为负');
         asset.balance = newBalance;
         save();
         renderAssets();
-        showToast('✅ 已更新');
+        showToast('已更新');
     }
 
     function deleteAsset(name) {
@@ -321,14 +358,14 @@
         assets = assets.filter(a => a.name !== name);
         save();
         renderAssets();
-        showToast('🗑️ 已删除');
+        showToast('已删除');
     }
 
     function renderAssets() {
         const list = document.getElementById('assetList');
         if (assets.length === 0) {
-            list.innerHTML = '<div class="empty-tip">暂无账户，添加一个吧 💼</div>';
-            document.getElementById('totalAssets').textContent = '¥0.00';
+            list.innerHTML = '<div class="empty-tip">暂无账户，添加一个吧</div>';
+            document.getElementById('totalAssets').textContent = '0.00';
             return;
         }
         let html = '';
@@ -339,25 +376,25 @@
             html += `
                 <div class="asset-item">
                     <span class="name">${a.name}</span>
-                    <span class="bal ${cls}">¥${a.balance.toFixed(2)}</span>
+                    <span class="bal ${cls}">${a.balance.toFixed(2)}</span>
                     <div class="asset-actions">
                         <button class="btn-success" onclick="updateAsset('${a.name}', 100)" style="padding:4px 10px;font-size:13px;">+100</button>
                         <button class="btn-danger" onclick="updateAsset('${a.name}', -100)" style="padding:4px 10px;font-size:13px;">-100</button>
-                        <button class="btn-warning" onclick="deleteAsset('${a.name}')" style="padding:4px 10px;font-size:13px;">✕</button>
+                        <button class="btn-warning" onclick="deleteAsset('${a.name}')" style="padding:4px 10px;font-size:13px;">×</button>
                     </div>
                 </div>
             `;
         });
         list.innerHTML = html;
-        document.getElementById('totalAssets').textContent = '¥' + total.toFixed(2);
+        document.getElementById('totalAssets').textContent = total.toFixed(2);
     }
 
     // ===== 导入CSV =====
     function importCSV() {
         const raw = document.getElementById('csvInput').value;
-        if (!raw.trim()) return showToast('⚠️ 请先粘贴CSV数据');
+        if (!raw.trim()) return showToast('请先粘贴CSV数据');
         const lines = raw.split('\n').filter(l => l.trim());
-        if (lines.length < 2) return showToast('⚠️ 数据太少，至少需要标题行+1条数据');
+        if (lines.length < 2) return showToast('数据太少，至少需要标题行+1条数据');
         let imported = 0;
         const header = lines[0].toLowerCase();
         const isWechat = header.includes('交易时间') && header.includes('金额') && header.includes('收/支');
@@ -442,11 +479,11 @@
             }
         }
         if (imported === 0) {
-            showToast('⚠️ 未能解析出有效数据，请检查格式');
+            showToast('未能解析出有效数据，请检查格式');
         } else {
             save();
             document.getElementById('csvInput').value = '';
-            showToast('✅ 成功导入 ' + imported + ' 条记录');
+            showToast('成功导入 ' + imported + ' 条记录');
             setTimeout(() => switchTab('record'), 800);
         }
     }
@@ -512,7 +549,7 @@
             type: 'doughnut',
             data: {
                 labels: catLabels.length ? catLabels : ['暂无数据'],
-                datasets: [{ data: catLabels.length ? catData : [1], backgroundColor: ['#a55eea','#ff6b6b','#feca57','#54a0ff','#2ed573','#ff9ff3'] }]
+                datasets: [{ data: catLabels.length ? catData : [1], backgroundColor: ['#007bff','#dc3545','#ffc107','#17a2b8','#28a745','#6c757d'] }]
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
         });
@@ -534,14 +571,14 @@
             type: 'line',
             data: {
                 labels: days.map(d => d.slice(5)),
-                datasets: [{ label: '支出', data: trendData, borderColor: '#e74c3c', tension: 0.2, fill: false }]
+                datasets: [{ label: '支出', data: trendData, borderColor: '#dc3545', tension: 0.2, fill: false }]
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
     }
 
     function exportData() {
-        if (records.length === 0) return showToast('⚠️ 没有数据可导出');
+        if (records.length === 0) return showToast('没有数据可导出');
         let text = '日期,类型,分类,项目,金额\n';
         records.forEach(r => {
             const type = r.amount > 0 ? '收入' : '支出';
@@ -552,13 +589,14 @@
         link.href = URL.createObjectURL(blob);
         link.download = `账本_${new Date().toISOString().slice(0,10)}.csv`;
         link.click();
-        showToast('✅ 导出成功');
+        showToast('导出成功');
     }
 
     // ===== 初始化 =====
     renderRecords();
     updateBalance();
     renderAssets();
+    renderBalanceChart();
 </script>
 </body>
 </html>
