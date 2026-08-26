@@ -20,7 +20,6 @@
         .btn-danger { background: #dc3545; }
         .btn-success { background: #28a745; }
         .btn-warning { background: #ffc107; color: #333; }
-        .btn-outline { background: transparent; color: #007bff; border: 2px solid #007bff; }
         .record-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .record-item .info { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
         .record-item .category { background: #e9ecef; padding: 2px 10px; border-radius: 12px; font-size: 12px; color: #666; }
@@ -81,6 +80,14 @@
         .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
         .legend-label { flex: 1; color: #333; }
         .legend-value { color: #888; font-size: 12px; }
+
+        /* 资产折叠样式 */
+        .collapse-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; cursor: pointer; user-select: none; }
+        .collapse-header .arrow { transition: transform 0.3s; font-size: 18px; }
+        .collapse-header .arrow.open { transform: rotate(180deg); }
+        .collapse-body { overflow: hidden; transition: max-height 0.3s ease; max-height: 0; }
+        .collapse-body.open { max-height: 5000px; }
+        .asset-count { font-size: 14px; color: #888; }
     </style>
 </head>
 <body>
@@ -137,11 +144,17 @@
         </div>
     </div>
 
-    <!-- ===== 资产页 ===== -->
+    <!-- ===== 资产页（折叠版） ===== -->
     <div id="tab-asset" class="hidden">
         <div class="card">
             <div class="total-assets" id="totalAssets">0.00</div>
-            <div id="assetList"></div>
+            <div class="collapse-header" onclick="toggleAssetCollapse()">
+                <span>资产明细 <span class="asset-count" id="assetCount">(0个账户)</span></span>
+                <span class="arrow" id="assetArrow">▼</span>
+            </div>
+            <div class="collapse-body" id="assetBody">
+                <div id="assetList"></div>
+            </div>
         </div>
         <div class="card">
             <div class="row">
@@ -200,6 +213,7 @@
     let records = JSON.parse(localStorage.getItem('records')) || [];
     let assets = JSON.parse(localStorage.getItem('assets')) || [];
     let chartCategory = null, chartTrend = null, chartBalance = null;
+    let assetCollapsed = false;
 
     function showToast(msg) {
         const t = document.getElementById('toast');
@@ -207,6 +221,19 @@
         t.classList.add('show');
         clearTimeout(t._timer);
         t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function toggleAssetCollapse() {
+        assetCollapsed = !assetCollapsed;
+        const body = document.getElementById('assetBody');
+        const arrow = document.getElementById('assetArrow');
+        if (assetCollapsed) {
+            body.classList.remove('open');
+            arrow.classList.remove('open');
+        } else {
+            body.classList.add('open');
+            arrow.classList.add('open');
+        }
     }
 
     function switchTab(tab) {
@@ -218,6 +245,13 @@
         if (tab === 'asset') renderAssets();
         if (tab === 'stats') renderStats();
         if (tab === 'record') renderBalanceChart();
+        // 默认展开资产列表
+        if (tab === 'asset') {
+            setTimeout(() => {
+                document.getElementById('assetBody').classList.add('open');
+                document.getElementById('assetArrow').classList.add('open');
+            }, 100);
+        }
     }
 
     function addRecord() {
@@ -371,9 +405,11 @@
 
     function renderAssets() {
         const list = document.getElementById('assetList');
+        const countEl = document.getElementById('assetCount');
         if (assets.length === 0) {
             list.innerHTML = '<div class="empty-tip">暂无账户，添加一个吧</div>';
             document.getElementById('totalAssets').textContent = '0.00';
+            countEl.textContent = '(0个账户)';
             return;
         }
         let html = '';
@@ -394,6 +430,7 @@
         });
         list.innerHTML = html;
         document.getElementById('totalAssets').textContent = total.toFixed(2);
+        countEl.textContent = '(' + assets.length + '个账户)';
     }
 
     // ===== 统计页 =====
@@ -474,7 +511,6 @@
         if (catLabels.length === 0) {
             rankContainer.innerHTML = '<div class="empty-tip">暂无支出数据</div>';
         } else {
-            // 按金额从大到小排序
             const sorted = catLabels.map((label, idx) => ({ label, value: catData[idx] }))
                 .sort((a, b) => b.value - a.value);
             const maxVal = sorted.length > 0 ? sorted[0].value : 1;
@@ -556,6 +592,11 @@
     updateBalance();
     renderAssets();
     renderBalanceChart();
+    // 默认展开资产
+    setTimeout(() => {
+        document.getElementById('assetBody').classList.add('open');
+        document.getElementById('assetArrow').classList.add('open');
+    }, 200);
 </script>
 </body>
 </html>
