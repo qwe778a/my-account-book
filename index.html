@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小Q智能账本</title>
+    <title>小Q全能账本</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -11,16 +11,16 @@
         .container { max-width: 420px; margin: auto; }
         .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         h2 { margin: 0 0 12px 0; font-size: 20px; display: flex; align-items: center; gap: 8px; }
-        .row { display: flex; gap: 10px; }
-        .row input { flex: 1; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .row input, .row select, .row button { flex: 1; min-width: 80px; }
         input, select, button, textarea { padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 10px; outline: none; width: 100%; margin-bottom: 10px; background: #fafafa; font-family: inherit; }
         input:focus, select:focus, textarea:focus { border-color: #a55eea; background: white; }
         button { background: #a55eea; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.97); }
         .btn-danger { background: #ff6b6b; }
         .btn-success { background: #2ed573; }
-        .btn-outline { background: transparent; color: #a55eea; border: 2px solid #a55eea; }
         .btn-warning { background: #feca57; color: #333; }
+        .btn-outline { background: transparent; color: #a55eea; border: 2px solid #a55eea; }
         .balance-box { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; padding: 8px 0; }
         .balance-box span { color: #a55eea; }
         .record-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
@@ -30,8 +30,8 @@
         .record-item .amount.income { color: #2ed573; }
         .record-item .del { color: #ccc; font-size: 18px; cursor: pointer; padding: 0 6px; }
         .record-item .del:active { color: #ff6b6b; }
-        .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-        .tab-bar button { flex: 1; background: #f0f0f0; color: #333; border: none; padding: 10px; border-radius: 10px; font-size: 14px; min-width: 60px; }
+        .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+        .tab-bar button { flex: 1; background: #f0f0f0; color: #333; border: none; padding: 10px 6px; border-radius: 10px; font-size: 13px; min-width: 60px; }
         .tab-bar .active { background: #a55eea; color: white; }
         .chart-container { height: 180px; margin-top: 10px; }
         .empty-tip { text-align: center; color: #999; padding: 30px 0; font-size: 14px; }
@@ -42,8 +42,15 @@
         .hidden { display: none; }
         textarea { height: 120px; font-size: 14px; resize: vertical; }
         .import-hint { font-size: 13px; color: #888; margin-bottom: 8px; }
-        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 10px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 999; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 10px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 999; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 90%; }
         .toast.show { opacity: 1; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .asset-item .name { font-weight: 600; }
+        .asset-item .bal { color: #2ed573; font-weight: 600; }
+        .asset-item .bal.negative { color: #ff6b6b; }
+        .asset-actions { display: flex; gap: 6px; }
+        .asset-actions button { padding: 4px 12px; font-size: 14px; margin: 0; flex: 0; }
+        .total-assets { font-size: 24px; color: #a55eea; font-weight: bold; text-align: center; padding: 10px 0; }
     </style>
 </head>
 <body>
@@ -54,6 +61,7 @@
     <div class="tab-bar">
         <button class="active" onclick="switchTab('record')">📝 记账</button>
         <button onclick="switchTab('import')">📥 导入</button>
+        <button onclick="switchTab('asset')">💼 资产</button>
         <button onclick="switchTab('stats')">📊 统计</button>
     </div>
 
@@ -109,26 +117,35 @@
                 <button class="btn-success" onclick="importCSV()" style="flex:1;">📤 导入数据</button>
                 <button class="btn-warning" onclick="document.getElementById('csvInput').value=''" style="flex:1;">清空</button>
             </div>
-            <div style="margin-top:10px;font-size:13px;color:#888;">
-                <details>
-                    <summary>📖 微信CSV格式示例（点开看）</summary>
-                    <pre style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all;">
-交易时间,交易类型,交易对方,商品,收/支,金额(元),支付方式,当前状态,交易单号,商户单号,备注
+            <details style="margin-top:10px;font-size:13px;color:#888;">
+                <summary>📖 微信CSV格式示例</summary>
+                <pre style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all;">交易时间,交易类型,交易对方,商品,收/支,金额(元),支付方式,当前状态,交易单号,商户单号,备注
 2026-08-26 12:30:00,扫码支付,张三,午餐,支出,25.50,零钱,支付成功,4200001234567890,1234567890123456,
-2026-08-25 09:00:00,转账,李四,工资,收入,5000.00,银行卡,支付成功,4200000987654321,9876543210987654,
-                    </pre>
-                </details>
-            </div>
-            <div style="margin-top:10px;font-size:13px;color:#888;">
-                <details>
-                    <summary>📖 支付宝CSV格式示例</summary>
-                    <pre style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all;">
-交易号,商品名称,金额,交易状态,交易时间,交易对方
+2026-08-25 09:00:00,转账,李四,工资,收入,5000.00,银行卡,支付成功,4200000987654321,9876543210987654,</pre>
+            </details>
+            <details style="margin-top:10px;font-size:13px;color:#888;">
+                <summary>📖 支付宝CSV格式示例</summary>
+                <pre style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all;">交易号,商品名称,金额,交易状态,交易时间,交易对方
 202608261200001,午餐,-25.50,交易成功,2026-08-26 12:30:00,张三
-202608250900001,工资,5000.00,交易成功,2026-08-25 09:00:00,李四
-                    </pre>
-                </details>
+202608250900001,工资,5000.00,交易成功,2026-08-25 09:00:00,李四</pre>
+            </details>
+        </div>
+    </div>
+
+    <!-- ===== 资产页 ===== -->
+    <div id="tab-asset" class="hidden">
+        <div class="card">
+            <h2>💼 我的资产</h2>
+            <div class="total-assets" id="totalAssets">¥0.00</div>
+            <div id="assetList"></div>
+        </div>
+        <div class="card">
+            <h2>➕ 添加账户</h2>
+            <div class="row">
+                <input id="assetName" placeholder="账户名（如：微信）" style="flex:2;">
+                <input id="assetBalance" placeholder="余额" type="number" step="0.01" style="flex:1;">
             </div>
+            <button onclick="addAsset()">➕ 添加账户</button>
         </div>
     </div>
 
@@ -155,14 +172,14 @@
             <button class="btn-danger" onclick="clearAll()" style="flex:1;">🗑️ 清空</button>
         </div>
     </div>
-
 </div>
 
 <script>
     let records = JSON.parse(localStorage.getItem('records')) || [];
-    let chartCategory = null;
-    let chartTrend = null;
+    let assets = JSON.parse(localStorage.getItem('assets')) || [];
+    let chartCategory = null, chartTrend = null;
 
+    // ===== Toast =====
     function showToast(msg) {
         const t = document.getElementById('toast');
         t.textContent = msg;
@@ -171,22 +188,18 @@
         t._timer = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
+    // ===== 切换标签 =====
     function switchTab(tab) {
         document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-        ['record','import','stats'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden'));
-        if (tab === 'record') {
-            document.querySelector('.tab-bar button:first-child').classList.add('active');
-            document.getElementById('tab-record').classList.remove('hidden');
-        } else if (tab === 'import') {
-            document.querySelector('.tab-bar button:nth-child(2)').classList.add('active');
-            document.getElementById('tab-import').classList.remove('hidden');
-        } else {
-            document.querySelector('.tab-bar button:last-child').classList.add('active');
-            document.getElementById('tab-stats').classList.remove('hidden');
-            renderStats();
-        }
+        ['record','import','asset','stats'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden'));
+        const map = { record:0, import:1, asset:2, stats:3 };
+        document.querySelectorAll('.tab-bar button')[map[tab]].classList.add('active');
+        document.getElementById('tab-'+tab).classList.remove('hidden');
+        if (tab === 'asset') renderAssets();
+        if (tab === 'stats') renderStats();
     }
 
+    // ===== 记账 =====
     function addRecord() {
         const desc = document.getElementById('desc').value.trim();
         const amount = parseFloat(document.getElementById('amount').value);
@@ -223,8 +236,12 @@
 
     function save() {
         localStorage.setItem('records', JSON.stringify(records));
+        localStorage.setItem('assets', JSON.stringify(assets));
         renderRecords();
         updateBalance();
+        if (document.getElementById('tab-asset') && !document.getElementById('tab-asset').classList.contains('hidden')) {
+            renderAssets();
+        }
     }
 
     function renderRecords() {
@@ -270,38 +287,92 @@
         document.getElementById('totalExpense').textContent = expense.toFixed(2);
     }
 
+    // ===== 资产管理 =====
+    function addAsset() {
+        const name = document.getElementById('assetName').value.trim();
+        const balance = parseFloat(document.getElementById('assetBalance').value);
+        if (!name) return showToast('⚠️ 请输入账户名');
+        if (isNaN(balance)) return showToast('⚠️ 请输入有效余额');
+        if (assets.find(a => a.name === name)) return showToast('⚠️ 该账户已存在');
+        assets.push({ name, balance });
+        document.getElementById('assetName').value = '';
+        document.getElementById('assetBalance').value = '';
+        save();
+        renderAssets();
+        showToast('✅ 账户添加成功');
+    }
+
+    function updateAsset(name, delta) {
+        const asset = assets.find(a => a.name === name);
+        if (!asset) return;
+        const newBalance = asset.balance + delta;
+        if (newBalance < 0) return showToast('⚠️ 余额不能为负');
+        asset.balance = newBalance;
+        save();
+        renderAssets();
+        showToast('✅ 已更新');
+    }
+
+    function deleteAsset(name) {
+        if (!confirm(`确定删除「${name}」吗？`)) return;
+        assets = assets.filter(a => a.name !== name);
+        save();
+        renderAssets();
+        showToast('🗑️ 已删除');
+    }
+
+    function renderAssets() {
+        const list = document.getElementById('assetList');
+        if (assets.length === 0) {
+            list.innerHTML = '<div class="empty-tip">暂无账户，添加一个吧 💼</div>';
+            document.getElementById('totalAssets').textContent = '¥0.00';
+            return;
+        }
+        let html = '';
+        let total = 0;
+        assets.forEach(a => {
+            total += a.balance;
+            const cls = a.balance < 0 ? 'negative' : '';
+            html += `
+                <div class="asset-item">
+                    <span class="name">${a.name}</span>
+                    <span class="bal ${cls}">¥${a.balance.toFixed(2)}</span>
+                    <div class="asset-actions">
+                        <button class="btn-success" onclick="updateAsset('${a.name}', 100)" style="padding:4px 10px;font-size:13px;">+100</button>
+                        <button class="btn-danger" onclick="updateAsset('${a.name}', -100)" style="padding:4px 10px;font-size:13px;">-100</button>
+                        <button class="btn-warning" onclick="deleteAsset('${a.name}')" style="padding:4px 10px;font-size:13px;">✕</button>
+                    </div>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+        document.getElementById('totalAssets').textContent = '¥' + total.toFixed(2);
+    }
+
     // ===== 导入CSV =====
     function importCSV() {
         const raw = document.getElementById('csvInput').value;
         if (!raw.trim()) return showToast('⚠️ 请先粘贴CSV数据');
-
         const lines = raw.split('\n').filter(l => l.trim());
         if (lines.length < 2) return showToast('⚠️ 数据太少，至少需要标题行+1条数据');
-
         let imported = 0;
-        // 尝试检测格式：看第一行（标题）包含哪些关键词
         const header = lines[0].toLowerCase();
-
-        // 微信格式：包含"交易时间","交易类型","交易对方","商品","收/支","金额"
         const isWechat = header.includes('交易时间') && header.includes('金额') && header.includes('收/支');
-        // 支付宝格式：包含"交易号","商品名称","金额","交易状态","交易时间"
         const isAlipay = header.includes('交易号') && header.includes('商品名称') && header.includes('金额');
 
         for (let i = 1; i < lines.length; i++) {
             const cols = parseCSVLine(lines[i]);
             if (cols.length < 3) continue;
-
             let date, desc, amount, type = 'expense', category = '其他';
 
             if (isWechat) {
-                // 微信：交易时间,交易类型,交易对方,商品,收/支,金额(元),...
-                const timeIdx = header.split(',').findIndex(h => h.includes('交易时间'));
-                const typeIdx = header.split(',').findIndex(h => h.includes('交易类型'));
-                const peerIdx = header.split(',').findIndex(h => h.includes('交易对方'));
-                const goodIdx = header.split(',').findIndex(h => h.includes('商品'));
-                const inoutIdx = header.split(',').findIndex(h => h.includes('收/支'));
-                const amtIdx = header.split(',').findIndex(h => h.includes('金额'));
-
+                const parts = header.split(',');
+                const timeIdx = parts.findIndex(h => h.includes('交易时间'));
+                const typeIdx = parts.findIndex(h => h.includes('交易类型'));
+                const peerIdx = parts.findIndex(h => h.includes('交易对方'));
+                const goodIdx = parts.findIndex(h => h.includes('商品'));
+                const inoutIdx = parts.findIndex(h => h.includes('收/支'));
+                const amtIdx = parts.findIndex(h => h.includes('金额'));
                 date = (timeIdx >= 0 && cols[timeIdx]) ? cols[timeIdx].trim() : new Date().toISOString();
                 const peer = (peerIdx >= 0) ? cols[peerIdx] || '' : '';
                 const good = (goodIdx >= 0) ? cols[goodIdx] || '' : '';
@@ -310,18 +381,14 @@
                 type = inout.includes('收入') ? 'income' : 'expense';
                 const amtStr = (amtIdx >= 0) ? cols[amtIdx] || '0' : '0';
                 amount = parseFloat(amtStr.replace(/,/g, '')) || 0;
-
-                // 根据交易类型关键词判断分类
                 const typeText = (typeIdx >= 0) ? (cols[typeIdx] || '') : '';
                 category = guessCategory(typeText + good + peer);
-
             } else if (isAlipay) {
-                // 支付宝：交易号,商品名称,金额,交易状态,交易时间,交易对方
-                const nameIdx = header.split(',').findIndex(h => h.includes('商品名称'));
-                const amtIdx = header.split(',').findIndex(h => h.includes('金额'));
-                const timeIdx = header.split(',').findIndex(h => h.includes('交易时间'));
-                const peerIdx = header.split(',').findIndex(h => h.includes('交易对方'));
-
+                const parts = header.split(',');
+                const nameIdx = parts.findIndex(h => h.includes('商品名称'));
+                const amtIdx = parts.findIndex(h => h.includes('金额'));
+                const timeIdx = parts.findIndex(h => h.includes('交易时间'));
+                const peerIdx = parts.findIndex(h => h.includes('交易对方'));
                 date = (timeIdx >= 0 && cols[timeIdx]) ? cols[timeIdx].trim() : new Date().toISOString();
                 desc = (nameIdx >= 0) ? cols[nameIdx] || '支付宝交易' : '支付宝交易';
                 if (peerIdx >= 0 && cols[peerIdx]) desc += ' - ' + cols[peerIdx];
@@ -330,10 +397,7 @@
                 type = amount >= 0 ? 'income' : 'expense';
                 amount = Math.abs(amount);
                 category = guessCategory(desc);
-
             } else {
-                // 通用格式：尝试智能解析
-                // 找包含数字的列作为金额，找包含日期的列作为日期
                 let amtIdx = -1, dateIdx = -1;
                 const parts = header.split(',');
                 parts.forEach((h, idx) => {
@@ -341,7 +405,6 @@
                     if (h.includes('时间') || h.includes('日期') || h.includes('日')) dateIdx = idx;
                 });
                 if (amtIdx < 0) {
-                    // 尝试找第一个看起来像数字的列
                     for (let j = 0; j < cols.length; j++) {
                         if (/[\d.]+/.test(cols[j]) && !/[年月日时分秒]/.test(cols[j])) {
                             amtIdx = j; break;
@@ -360,10 +423,8 @@
             }
 
             if (amount > 0 && desc) {
-                // 尝试解析日期
                 let dateObj = new Date(date);
                 if (isNaN(dateObj.getTime())) {
-                    // 尝试把 "2026-08-26 12:30:00" 或 "2026/08/26" 转成日期
                     const dateClean = date.replace(/\//g, '-');
                     dateObj = new Date(dateClean);
                     if (isNaN(dateObj.getTime())) dateObj = new Date();
@@ -377,14 +438,12 @@
                 imported++;
             }
         }
-
         if (imported === 0) {
             showToast('⚠️ 未能解析出有效数据，请检查格式');
         } else {
             save();
             document.getElementById('csvInput').value = '';
             showToast('✅ 成功导入 ' + imported + ' 条记录');
-            // 自动切到记账页看结果
             setTimeout(() => switchTab('record'), 800);
         }
     }
@@ -418,7 +477,7 @@
         return result;
     }
 
-    // ===== 统计页 =====
+    // ===== 统计 =====
     function renderStats() {
         const now = new Date();
         const month = now.getMonth();
@@ -496,6 +555,7 @@
     // ===== 初始化 =====
     renderRecords();
     updateBalance();
+    renderAssets();
 </script>
 </body>
 </html>
